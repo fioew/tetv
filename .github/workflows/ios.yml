@@ -19,7 +19,7 @@ jobs:
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '26.3.0'
+          xcode-version: '16.0'
 
       - name: Install XcodeGen
         run: |
@@ -35,11 +35,11 @@ jobs:
           SCHEME="tvbox"
           CONFIGURATION="Release"
           ARCHIVE_PATH="build/tvbox.xcarchive"
-          EXPORT_PATH="build/exported"
+          APP_PATH="build/tvbox.xcarchive/Products/Applications/TVBox.app"
 
           # 清理构建目录
           rm -rf build
-          rm -f TVBox.ipa
+          rm -f TVBox-Unsigned.ipa
 
           echo "Building iOS Archive (Unsigned)..."
           xcodebuild archive \
@@ -52,23 +52,21 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
 
-          echo "Exporting unsigned IPA..."
-          mkdir -p "$EXPORT_PATH"
+          echo "Creating unsigned IPA..."
+          # 创建 IPA 包结构
+          mkdir -p build/Payload
+          cp -r "$APP_PATH" build/Payload/
 
-          # 导出未签名的 IPA
-          xcodebuild -exportArchive \
-            -archivePath "$ARCHIVE_PATH" \
-            -exportOptionsPlist ExportOptions-Unsigned.plist \
-            -exportPath "$EXPORT_PATH" \
-            -allowProvisioningUpdates
+          # 创建未签名的 IPA
+          cd build
+          zip -r ../TVBox-Unsigned.ipa Payload
+          cd ..
 
-          # 查找并复制 IPA 文件
-          IPA_FILE=$(find "$EXPORT_PATH" -name "*.ipa" | head -n 1)
-          if [ -n "$IPA_FILE" ]; then
-            cp "$IPA_FILE" ./TVBox-Unsigned.ipa
+          if [ -f "TVBox-Unsigned.ipa" ]; then
             echo "✅ Build completed! Generated: TVBox-Unsigned.ipa"
+            ls -lh TVBox-Unsigned.ipa
           else
-            echo "❌ Failed to find .ipa file in export directory"
+            echo "❌ Failed to create IPA file"
             exit 1
           fi
 
