@@ -21,13 +21,38 @@ jobs:
         with:
           xcode-version: '26.3.0'
 
+      - name: Verify Xcode Installation
+        run: |
+          echo "Current Xcode version:"
+          xcodebuild -version
+
+          echo -e "\nXcode location:"
+          xcode-select -p
+
+          echo -e "\nAvailable Xcode installations:"
+          ls -la /Applications/ | grep -i xcode
+
       - name: Install iOS Platform
         run: |
           # 安装 iOS 平台 SDK
           sudo xcodebuild -runFirstLaunch
-          sudo xcode-select -s /Applications/Xcode_26.3.0.app
-          # 显式安装 iOS 平台
-          xcodebuild -downloadPlatform iOS
+
+          # 获取正确的 Xcode 路径
+          XCODE_PATH=$(xcode-select -p | sed 's|/Contents/Developer||')
+          echo "Using Xcode at: $XCODE_PATH"
+
+          # 检查并安装 iOS 平台
+          echo "Checking available platforms..."
+          xcodebuild -showPlatforms
+
+          echo "Downloading iOS platform..."
+          xcodebuild -downloadPlatform iOS || true
+
+          # 等待平台安装完成
+          sleep 10
+
+          echo "Verifying iOS platform installation..."
+          xcodebuild -showPlatforms | grep -i "ios" || echo "iOS platform not found, but continuing..."
 
       - name: Install XcodeGen
         run: |
@@ -36,6 +61,14 @@ jobs:
       - name: Generate Xcode project
         run: |
           xcodegen generate
+
+      - name: Debug - Show available destinations
+        run: |
+          echo "Available destinations for tvbox scheme:"
+          xcodebuild -project tvbox.xcodeproj -scheme tvbox -showDestinations
+
+          echo -e "\nAvailable platforms:"
+          xcodebuild -showPlatforms
 
       - name: Build iOS App (Unsigned)
         run: |
