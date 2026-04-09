@@ -41,9 +41,9 @@ jobs:
           XCODE_PATH=$(xcode-select -p | sed 's|/Contents/Developer||')
           echo "Using Xcode at: $XCODE_PATH"
 
-          # 检查并安装 iOS 平台
-          echo "Checking available platforms..."
-          xcodebuild -showPlatforms
+          # 检查可用的 SDK
+          echo "Checking available SDKs..."
+          xcodebuild -showsdks
 
           echo "Downloading iOS platform..."
           xcodebuild -downloadPlatform iOS || true
@@ -51,8 +51,8 @@ jobs:
           # 等待平台安装完成
           sleep 10
 
-          echo "Verifying iOS platform installation..."
-          xcodebuild -showPlatforms | grep -i "ios" || echo "iOS platform not found, but continuing..."
+          echo "Verifying iOS SDK installation..."
+          xcodebuild -showsdks | grep -i "ios" || echo "iOS SDK not found, but continuing..."
 
       - name: Install XcodeGen
         run: |
@@ -67,8 +67,8 @@ jobs:
           echo "Available destinations for tvbox scheme:"
           xcodebuild -project tvbox.xcodeproj -scheme tvbox -showDestinations
 
-          echo -e "\nAvailable platforms:"
-          xcodebuild -showPlatforms
+          echo -e "\nAvailable SDKs:"
+          xcodebuild -showsdks
 
       - name: Build iOS App (Unsigned)
         run: |
