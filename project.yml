@@ -1,7 +1,7 @@
 name: tvbox
 options:
   bundleIdPrefix: com.tvbox
-  xcodeVersion: "15.0"
+  xcodeVersion: "26.3.0"
   groupSortPosition: top
   minimumXcodeGenVersion: "2.35"
 
