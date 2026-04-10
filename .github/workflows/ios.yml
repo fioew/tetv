@@ -65,7 +65,7 @@ jobs:
       - name: Debug - Show available destinations
         run: |
           echo "Available destinations for tvbox scheme:"
-          xcodebuild -project tvbox.xcodeproj -scheme tvbox -showDestinations
+          xcodebuild -project tvbox.xcodeproj -scheme tvbox -showdestinations
 
           echo -e "\nAvailable SDKs:"
           xcodebuild -showsdks
